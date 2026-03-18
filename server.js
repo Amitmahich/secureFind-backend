@@ -1,0 +1,45 @@
+const express = require("express");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const http = require("http");
+const cors = require("cors");
+const authRoutes = require("./routes/authRoutes");
+const itemRoutes = require("./routes/itemRoutes");
+const userRoutes = require("./routes/userRoutes");
+
+// socket import
+const { initSocket } = require("./sockets/socket");
+
+dotenv.config();
+
+// DB connect
+connectDB();
+
+const app = express();
+
+// middleware
+app.use(cors());
+app.use(express.json());
+
+// routes
+app.use("/api/auth", authRoutes);
+app.use("/api/items", itemRoutes);
+app.use("/api/users", userRoutes);
+
+// basic route
+app.get("/", (req, res) => {
+  res.send("API running...");
+});
+
+// create server
+const server = http.createServer(app);
+
+// init socket
+initSocket(server);
+
+// start server
+const PORT = process.env.PORT || 5000;
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
