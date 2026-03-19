@@ -6,7 +6,7 @@ const {
 let io;
 
 const initSocket = (server) => {
-  const { Server } = require("socket.io"); 
+  const { Server } = require("socket.io");
 
   io = new Server(server, {
     cors: { origin: "*" },
@@ -23,6 +23,7 @@ const initSocket = (server) => {
     const userId = socket.user.id;
     if (userId) {
       socket.join(userId.toString());
+      console.log(`User joined room: ${userId}`);
     }
 
     // Admin room (group)

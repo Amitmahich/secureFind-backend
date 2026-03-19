@@ -49,6 +49,12 @@ const itemSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // models/itemModel.js
+    status: {
+      type: String,
+      enum: ["AVAILABLE", "CLAIMED"],
+      default: "AVAILABLE",
+    },
   },
   {
     timestamps: true, // createdAt + updatedAt

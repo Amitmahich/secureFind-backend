@@ -6,6 +6,7 @@ const reportModel = require("../models/reportModel");
 const { getIO } = require("../sockets/socket");
 const { createDiffieHellmanGroup } = require("crypto");
 const Response = require("../models/responseModel");
+const responseModel = require("../models/responseModel");
 
 const getAllUsersController = async (req, res) => {
   try {
@@ -176,13 +177,11 @@ const getUserPhoneController = async (req, res) => {
     }
 
     // fetch user phone
-    const user = await userModel
-      .findById(id)
-      .select("firstName lastName mobile email");
+    const user = await userModel.findById(id).select("mobile");
 
     res.status(200).json({
       success: true,
-      user: { ...user._doc, phone: user.mobile },
+      user: { phone: user.mobile },
     });
   } catch (error) {
     console.log(error);
