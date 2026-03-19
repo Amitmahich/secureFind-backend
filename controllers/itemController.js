@@ -1,15 +1,19 @@
 const itemModel = require("../models/itemModel");
+const Notification = require("../models/notificationModel");
 const reportModel = require("../models/reportModel");
 const { getIO } = require("../sockets/socket");
 const mongoose = require("mongoose");
 const sendEmail = require("../utils/sendEmail");
 const getItemCreationTemplate = require("../utils/itemCreationEmailTemplate");
+const userModel = require("../models/userModel");
 
 //create item
 const createItemController = async (req, res) => {
   try {
     const { itemName, description, imageUrl, itemType, question, location } =
       req.body || {};
+
+    // validation
     if (
       !itemName ||
       !description ||
@@ -23,6 +27,8 @@ const createItemController = async (req, res) => {
         message: "Please provide all required fields",
       });
     }
+
+    // create item
     const item = await itemModel.create({
       itemName,
       description,
@@ -32,7 +38,8 @@ const createItemController = async (req, res) => {
       location,
       user: req.user._id,
     });
-    /////////////////////////////// SEND MAIL PART START //////////////////////////////
+
+    ////////////////// EMAIL //////////////////
     try {
       await sendEmail({
         to: req.user.email,
@@ -45,26 +52,51 @@ const createItemController = async (req, res) => {
         ),
       });
     } catch (err) {
-      console.log(err);
       console.log("Email failed but item saved");
     }
-    /////////////////////////////// SEND MAIL PART END //////////////////////////////
-    ////////////////////////////////  SOCKET PART START  //////////////////////////////////////////////////
+
+    ////////////////// SOCKET //////////////////
     const io = getIO();
 
-    // notify all users
+    // creator (MyListings)
+    io.to(req.user._id.toString()).emit("myItemCreated", item);
+
+    // dashboard (all users)
     io.emit("newItem", {
       message: "New item posted",
       item,
     });
 
-    // notify Admin
+    ////////////////// NOTIFICATIONS //////////////////
+
+    // get all users except creator
+    const users = await userModel.find({
+      _id: { $ne: req.user._id },
+    });
+
+    // create + send notifications
+    await Promise.all(
+      users.map(async (user) => {
+        const notification = await Notification.create({
+          user: user._id,
+          message: `${req.user.firstName} ${req.user.lastName} posted: ${item.itemName}`,
+          itemId: item._id,
+          itemType: item.itemType,
+          type: "ITEM_CREATED",
+        });
+
+        // send to that specific user
+        io.to(user._id.toString()).emit("newNotification", notification);
+      }),
+    );
+
+    ////////////////// ADMIN //////////////////
     io.to("admin").emit("adminNewItem", {
       message: "New item needs review",
       item,
     });
-    ////////////////////////////////  SOCKET PART END  //////////////////////////////////////////////////
 
+    ////////////////// RESPONSE //////////////////
     res.status(201).send({
       success: true,
       message: "Item created successfully",
@@ -74,7 +106,7 @@ const createItemController = async (req, res) => {
     console.log(error);
     return res.status(500).send({
       success: false,
-      massage: "Error in Create Item API",
+      message: "Error in Create Item API",
     });
   }
 };
