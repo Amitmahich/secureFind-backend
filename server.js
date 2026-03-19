@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const itemRoutes = require("./routes/itemRoutes");
 const userRoutes = require("./routes/userRoutes");
 const responseRoutes = require("./routes/responseRoutes");
+const notificationRoutes = require("./routes/notificationRoute");
 
 // socket import
 const { initSocket } = require("./sockets/socket");
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/responses", responseRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // basic route
 app.get("/health", (req, res) => {
