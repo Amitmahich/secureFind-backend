@@ -206,6 +206,18 @@ const deleteItemController = async (req, res) => {
 
     // delete item
     await item.deleteOne();
+    //  SOCKET EMIT
+    const io = getIO();
+
+    // admin ko notify
+    io.to("admin").emit("itemDeleted", {
+      itemId: id,
+    });
+
+    // sab users ko notify (optional but recommended)
+    io.emit("itemDeleted", {
+      itemId: id,
+    });
 
     res.status(200).json({
       success: true,
