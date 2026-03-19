@@ -172,6 +172,11 @@ const updateResponseStatusController = async (req, res) => {
       itemId: response.item._id,
       message: "Your response has been approved 🎉",
     });
+    // notify owner also
+    io.to(req.user._id.toString()).emit("responseUpdated", {
+      responseId: response._id,
+      status: "APPROVED",
+    });
     //////////////////////////////////SOCKET PART END//////////////////////////////////
 
     res.json({
