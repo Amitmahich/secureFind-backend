@@ -2,6 +2,8 @@ const itemModel = require("../models/itemModel");
 const reportModel = require("../models/reportModel");
 const { getIO } = require("../sockets/socket");
 const mongoose = require("mongoose");
+const sendEmail = require("../utils/sendEmail");
+const getItemCreationTemplate = require("../utils/itemCreationEmailTemplate");
 
 //create item
 const createItemController = async (req, res) => {
@@ -30,6 +32,23 @@ const createItemController = async (req, res) => {
       location,
       user: req.user._id,
     });
+    /////////////////////////////// SEND MAIL PART START //////////////////////////////
+    try {
+      await sendEmail({
+        to: req.user.email,
+        subject: "Item Submitted Successfully 🎉",
+        html: getItemCreationTemplate(
+          req.user.firstName + " " + req.user.lastName,
+          item.itemName,
+          item.location,
+          item.itemType,
+        ),
+      });
+    } catch (err) {
+      console.log(err);
+      console.log("Email failed but item saved");
+    }
+    /////////////////////////////// SEND MAIL PART END //////////////////////////////
     ////////////////////////////////  SOCKET PART START  //////////////////////////////////////////////////
     const io = getIO();
 
