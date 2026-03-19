@@ -4,6 +4,43 @@ const sendEmail = require("../utils/sendEmail");
 const { getApprovalEmailTemplate } = require("../utils/approvalEmailTemplate");
 const itemModel = require("../models/itemModel");
 
+//get all responses
+const getMyResponsesController = async (req, res) => {
+  try {
+    // items owned by user
+    const items = await itemModel.find({ user: req.user._id }).select("_id");
+    const itemIds = items.map((item) => item._id);
+
+    // received (responses on my items)
+    const received = await responseModel
+      .find({ item: { $in: itemIds } })
+      .populate("responder", "name email phone")
+      .populate("item", "itemName user")
+      .sort({ createdAt: -1 });
+
+    // sent (responses I made)
+    const sent = await responseModel
+      .find({ responder: req.user._id })
+      .populate("item", "itemName user")
+      .sort({ createdAt: -1 });
+
+    // hide phone if not approved
+    received.forEach((r) => {
+      if (r.status !== "APPROVED") {
+        r.responder.phone = null;
+      }
+    });
+
+    res.json({
+      success: true,
+      received,
+      sent,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // submit answer
 const submitAnswerController = async (req, res) => {
   try {
@@ -147,4 +184,8 @@ const updateResponseStatusController = async (req, res) => {
     });
   }
 };
-module.exports = { submitAnswerController, updateResponseStatusController };
+module.exports = {
+  submitAnswerController,
+  updateResponseStatusController,
+  getMyResponsesController,
+};

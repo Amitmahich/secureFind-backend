@@ -1,10 +1,11 @@
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 const userModel = require("../models/userModel");
 const { findById } = require("../models/itemModel");
 const itemModel = require("../models/itemModel");
 const reportModel = require("../models/reportModel");
 const { getIO } = require("../sockets/socket");
 const { createDiffieHellmanGroup } = require("crypto");
+const Response = require("../models/responseModel");
 
 const getAllUsersController = async (req, res) => {
   try {
@@ -137,9 +138,57 @@ const toggleBlockUserController = async (req, res) => {
     });
   }
 };
+//get user phone
+const getUserPhoneController = async (req, res) => {
+  try {
+    const { id } = req.params; // responder id
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    // check if approved response exists
+    const approvedResponse = await Response.findOne({
+      responder: id,
+      status: "APPROVED",
+    }).populate("item");
+
+    if (!approvedResponse) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to view phone",
+      });
+    }
+
+    //ensure requester is item owner
+    if (approvedResponse.item.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
+    // fetch user phone
+    const user = await User.findById(id).select("name phone email");
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   getAllUsersController,
   deleteUserController,
   toggleBlockUserController,
+  getUserPhoneController,
 };

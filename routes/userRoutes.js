@@ -5,6 +5,7 @@ const {
   getAllUsersController,
   deleteUserController,
   toggleBlockUserController,
+  getUserPhoneController,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.patch(
   authorizeRoles("ADMIN"),
   toggleBlockUserController,
 );
-
+//get user phone
+router.get("/user-phone/:id", authMiddleware, getUserPhoneController);
 module.exports = router;
