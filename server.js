@@ -6,6 +6,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const itemRoutes = require("./routes/itemRoutes");
 const userRoutes = require("./routes/userRoutes");
+const responseRoutes = require("./routes/responseRoutes");
 
 // socket import
 const { initSocket } = require("./sockets/socket");
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/responses", responseRoutes);
 
 // basic route
 app.get("/", (req, res) => {

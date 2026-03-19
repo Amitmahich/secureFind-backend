@@ -43,7 +43,7 @@ const getApprovalEmailTemplate = (name, itemName, ownerName, phone) => {
             <!-- Footer -->
             <tr>
               <td style="background:#f1f1f1; text-align:center; padding:15px;">
-                © ${new Date().getFullYear()} SecureFind
+                © ${new Date().getFullYear()} SecureFind. All rights reserved.
               </td>
             </tr>
 
