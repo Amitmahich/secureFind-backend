@@ -84,10 +84,17 @@ const submitAnswerController = async (req, res) => {
       answer,
     });
     ////////////////////////////SOCKET START//////////////////////////
-    // notify item owner
     const io = getIO();
+    // populate before emit
+    const populatedResponse = await responseModel
+      .findById(response._id)
+      .populate("item", "itemName user")
+      .populate("responder", "name email");
 
-    io.to(item.user.toString()).emit("newResponse", response);
+    // notify item owner
+    io.to(item.user.toString()).emit("newResponse", {
+      response: populatedResponse,
+    });
     //////////////////////SOCKET END//////////////////////////
     res.json({
       success: true,
