@@ -21,7 +21,7 @@ const initSocket = (server) => {
     console.log("Socket connected:", socket.id);
 
     // User room (personal)
-    const userId = socket.user.id.toString();
+    const userId = socket.user._id.toString();
     if (!userId) {
       return socket.disconnect();
     }
