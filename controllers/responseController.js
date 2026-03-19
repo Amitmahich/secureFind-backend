@@ -172,17 +172,26 @@ const updateResponseStatusController = async (req, res) => {
     response.item.status = "APPROVED";
     await response.item.save();
     //////////////////////////////////SOCKET PART START//////////////////////////////////
-    // notify responder
     const io = getIO();
+    const responseIdStr = response._id.toString();
+    const itemIdStr = response.item._id.toString();
 
-    io.to(response.responder._id.toString()).emit("responseApproved", {
-      itemId: response.item._id,
-      message: "Your response has been approved 🎉",
+    // 1. Notify the Responder (The person who found/lost the item)
+    // We send the itemId so the frontend can find the specific card to update
+    io.to(response.responder._id.toString()).emit("statusUpdated", {
+      responseId: responseIdStr,
+      itemId: itemIdStr,
+      newStatus: "APPROVED",
+      message: `Your response for ${response.item.itemName} was approved! 🎉`,
     });
-    // notify owner also
-    io.to(req.user._id.toString()).emit("responseUpdated", {
-      responseId: response._id,
-      status: "APPROVED",
+
+    // 2. Notify the Owner (The person who clicked 'Approve')
+    // This ensures their UI updates without a page refresh
+    io.to(req.user._id.toString()).emit("statusUpdated", {
+      responseId: responseIdStr,
+      itemId: itemIdStr,
+      newStatus: "APPROVED",
+      message: "Response approved successfully",
     });
     //////////////////////////////////SOCKET PART END//////////////////////////////////
 
