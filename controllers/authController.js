@@ -262,7 +262,7 @@ const resetPasswordController = async (req, res) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
-    user.save();
+    await user.save();
 
     res.status(200).send({
       success: true,

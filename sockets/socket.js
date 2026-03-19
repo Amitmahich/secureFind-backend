@@ -6,8 +6,7 @@ const {
 let io;
 
 const initSocket = (server) => {
-  const { Server } = require("socket.io");
-  const jwt = require("jsonwebtoken");
+  const { Server } = require("socket.io"); 
 
   io = new Server(server, {
     cors: { origin: "*" },
@@ -21,11 +20,10 @@ const initSocket = (server) => {
     console.log("Socket connected:", socket.id);
 
     // User room (personal)
-    const userId = socket.user.id.toString();
-    if (!userId) {
-      return socket.disconnect();
+    const userId = socket.user.id;
+    if (userId) {
+      socket.join(userId.toString());
     }
-    socket.join(userId);
 
     // Admin room (group)
     if (socket.user.role === "ADMIN") {

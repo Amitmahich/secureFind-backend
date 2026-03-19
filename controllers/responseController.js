@@ -14,7 +14,7 @@ const getMyResponsesController = async (req, res) => {
     // received (responses on my items)
     const received = await responseModel
       .find({ item: { $in: itemIds } })
-      .populate("responder", "name email phone")
+      .populate("responder", "name email mobile")
       .populate("item", "itemName user")
       .sort({ createdAt: -1 });
 
@@ -24,10 +24,10 @@ const getMyResponsesController = async (req, res) => {
       .populate("item", "itemName user")
       .sort({ createdAt: -1 });
 
-    // hide phone if not approved
+    // hide mobile if not approved
     received.forEach((r) => {
       if (r.status !== "APPROVED") {
-        r.responder.phone = null;
+        r.responder.mobile = null;
       }
     });
 
@@ -143,7 +143,7 @@ const updateResponseStatusController = async (req, res) => {
 
     if (alreadyApproved) {
       return res.status(400).json({
-        message: "Item already claimed",
+        message: "Item already approved",
       });
     }
 
@@ -154,7 +154,7 @@ const updateResponseStatusController = async (req, res) => {
     try {
       await sendEmail({
         to: response.responder.email,
-        subject: "Your Claim is Approved 🎉",
+        subject: "Your response is Approved 🎉",
         html: getApprovalEmailTemplate(
           response.responder.firstName + " " + response.responder.lastName,
           response.item.itemName,
@@ -168,8 +168,8 @@ const updateResponseStatusController = async (req, res) => {
     }
     ////////////////////////////////SEND EMAIL END
 
-    // optionally mark item as claimed
-    response.item.status = "CLAIMED";
+    // optionally mark item as approved
+    response.item.status = "APPROVED";
     await response.item.save();
     //////////////////////////////////SOCKET PART START//////////////////////////////////
     // notify responder

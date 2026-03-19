@@ -142,6 +142,7 @@ const toggleBlockUserController = async (req, res) => {
 const getUserPhoneController = async (req, res) => {
   try {
     const { id } = req.params; // responder id
+    const currentUserId = req.user._id.toString();
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -150,36 +151,41 @@ const getUserPhoneController = async (req, res) => {
       });
     }
 
-    // check if approved response exists
-    const approvedResponse = await Response.findOne({
-      responder: id,
-      status: "APPROVED",
-    }).populate("item");
+    // Find the approved response involving this user and the current item
+    const approvedResponse = await responseModel
+      .findOne({
+        $or: [
+          { responder: id, status: "APPROVED" },
+          { responder: currentUserId, status: "APPROVED" },
+        ],
+      })
+      .populate("item");
 
     if (!approvedResponse) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to view phone",
-      });
+      return res
+        .status(403)
+        .json({ success: false, message: "No approved claim found" });
     }
 
-    //ensure requester is item owner
-    if (approvedResponse.item.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied",
-      });
+    // Verify the requester is either the owner or the responder of this specific item
+    const isOwner = approvedResponse.item.user.toString() === currentUserId;
+    const isResponder = approvedResponse.responder.toString() === currentUserId;
+
+    if (!isOwner && !isResponder) {
+      return res.status(403).json({ success: false, message: "Access denied" });
     }
 
     // fetch user phone
-    const user = await User.findById(id).select("name phone email");
+    const user = await userModel
+      .findById(id)
+      .select("firstName lastName mobile email");
 
     res.status(200).json({
       success: true,
-      user,
+      user: { ...user._doc, phone: user.mobile },
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,
