@@ -22,10 +22,13 @@ const initSocket = (server) => {
 
     // User room (personal)
     const userId = socket.user.id.toString();
+    if (!userId) {
+      return socket.disconnect();
+    }
     socket.join(userId);
 
     // Admin room (group)
-    if (socket.user.role === "admin") {
+    if (socket.user.role === "ADMIN") {
       socket.join("admin");
       console.log("Admin joined:", socket.id);
     }

@@ -29,8 +29,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/responses", responseRoutes);
 
 // basic route
-app.get("/", (req, res) => {
-  res.send("API running...");
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
 });
 
 // create server
