@@ -57,7 +57,7 @@ const itemSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // createdAt + updatedAt
+    timestamps: true,
   },
 );
 
