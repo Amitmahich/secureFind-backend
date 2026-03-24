@@ -116,6 +116,7 @@ const updateResponseStatusController = async (req, res) => {
 
     if (!response) {
       return res.status(404).json({
+        success: false,
         message: "Response not found",
       });
     }
@@ -123,6 +124,7 @@ const updateResponseStatusController = async (req, res) => {
     // only item owner
     if (response.item.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
+        success: false,
         message: "Not authorized",
       });
     }
@@ -130,8 +132,16 @@ const updateResponseStatusController = async (req, res) => {
     //already approved → no change allowed
     if (response.status === "APPROVED") {
       return res.status(400).json({
+        message: false,
         message: "Already approved. Cannot change status.",
       });
+      // check item already claimed
+      if (response.item.status === "CLAIMED") {
+        return res.status(400).json({
+          success: false,
+          message: "Item already claimed",
+        });
+      }
     }
 
     // check if already someone approved
@@ -142,6 +152,7 @@ const updateResponseStatusController = async (req, res) => {
 
     if (alreadyApproved) {
       return res.status(400).json({
+        success: false,
         message: "Item already approved",
       });
     }
@@ -149,6 +160,10 @@ const updateResponseStatusController = async (req, res) => {
     // approve
     response.status = "APPROVED";
     await response.save();
+
+    // update item
+    response.item.status = "CLAIMED";
+    await response.item.save();
     /////////////////////////////SEND EMAIL START/////////////////////////////////////
     try {
       await sendEmail({
@@ -167,57 +182,34 @@ const updateResponseStatusController = async (req, res) => {
     }
     ////////////////////////////////SEND EMAIL END/////////////////////////////////////
 
-    const itemId = response.item._id;
-
-    const item = await itemModel.findById(itemId);
-    if (!item) {
-      return res.status(404).send({
-        success: false,
-        message: "Item not found",
-      });
-    }
-
-    // ADD HERE
-    if (item.status === "CLAIMED") {
-      return res.status(400).json({
-        success: false,
-        message: "Item already claimed",
-      });
-    }
-    // optionally mark item as approved
-    response.item.status = "CLAIMED";
-    await response.item.save();
     //////////////////////////////////SOCKET PART START//////////////////////////////////
     const io = getIO();
-    const responseIdStr = response._id.toString();
-    const itemIdStr = response.item._id.toString();
 
     // 1. Notify the Responder (The person who found/lost the item)
     // We send the itemId so the frontend can find the specific card to update
     io.to(response.responder._id.toString()).emit("statusUpdated", {
-      responseId: responseIdStr,
-      itemId: itemIdStr,
+      responseId: response._id,
+      itemId: response.item._id,
       newStatus: "APPROVED",
-      message: `Your response for ${response.item.itemName} was approved! 🎉`,
     });
 
     // 2. Notify the Owner (The person who clicked 'Approve')
     // This ensures their UI updates without a page refresh
     io.to(req.user._id.toString()).emit("statusUpdated", {
-      responseId: responseIdStr,
-      itemId: itemIdStr,
+      responseId: response._id,
+      itemId: response.item._id,
       newStatus: "APPROVED",
-      message: "Response approved successfully",
     });
     //////////////////////////////////SOCKET PART END//////////////////////////////////
 
-    res.json({
+    res.status(200).json({
       success: true,
       message: "Response approved successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.log("Approve error:", error);
     res.status(500).json({
+      success: false,
       message: error.message,
     });
   }
