@@ -8,6 +8,7 @@ const itemRoutes = require("./routes/itemRoutes");
 const userRoutes = require("./routes/userRoutes");
 const responseRoutes = require("./routes/responseRoutes");
 const notificationRoutes = require("./routes/notificationRoute");
+const reportRoutes = require("./routes/reportRoutes");
 
 // socket import
 const { initSocket } = require("./sockets/socket");
@@ -29,6 +30,7 @@ app.use("/api/items", itemRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/responses", responseRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/reports", reportRoutes);
 
 // basic route
 app.get("/health", (req, res) => {

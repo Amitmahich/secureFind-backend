@@ -92,4 +92,25 @@ const reportItemController = async (req, res) => {
     });
   }
 };
-module.exports = { reportItemController };
+// get report for a item
+const getItemReportsController = async (req, res) => {
+  try {
+    const reports = await reportModel
+      .find({ item: req.params.id })
+      .populate("reportedBy", "firstName lastName email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).send({
+      success: true,
+      count: reports.length,
+      reports,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error in Get report API",
+    });
+  }
+};
+module.exports = { reportItemController ,getItemReportsController};

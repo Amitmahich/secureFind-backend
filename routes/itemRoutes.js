@@ -22,14 +22,5 @@ router.get("/get-item/:id", authMiddleware, getSingleItemController);
 router.get("/get-my-items", authMiddleware, getMyItems);
 //delete-item
 router.delete("/delete-item/:id", authMiddleware, deleteItemController);
-//report-item
-router.post("/report-item/:id", authMiddleware, reportItemController);
-//get-reports for single item
-router.get(
-  "/item-reports/:id",
-  authMiddleware,
-  authorizeRoles("ADMIN"),
-  getItemReportsController,
-);
 
 module.exports = router;

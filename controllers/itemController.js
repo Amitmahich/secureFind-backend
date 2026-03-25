@@ -1,6 +1,5 @@
 const itemModel = require("../models/itemModel");
 const Notification = require("../models/notificationModel");
-const reportModel = require("../models/reportModel");
 const { getIO } = require("../sockets/socket");
 const mongoose = require("mongoose");
 const sendEmail = require("../utils/sendEmail");
@@ -262,36 +261,6 @@ const deleteItemController = async (req, res) => {
     });
   }
 };
-// get item reports
-const getItemReportsController = async (req, res) => {
-  try {
-    const { id } = req.params; // itemId
-
-    // valid id check
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid item ID",
-      });
-    }
-
-    const reports = await reportModel
-      .find({ item: id })
-      .populate("reportedBy", "firstName lastName email") // user details
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({
-      success: true,
-      count: reports.length,
-      reports,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
 
 module.exports = {
   createItemController,
@@ -299,5 +268,4 @@ module.exports = {
   getSingleItemController,
   getMyItems,
   deleteItemController,
-  getItemReportsController,
 };
