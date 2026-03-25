@@ -10,7 +10,7 @@ const router = express.Router();
 router.post("/report-item/:id", authMiddleware, reportItemController);
 //get reports for an item
 router.get(
-  "item-report",
+  "item-report/:id",
   authMiddleware,
   authorizeRoles("ADMIN"),
   getItemReportsController,

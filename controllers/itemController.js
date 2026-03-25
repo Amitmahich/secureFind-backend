@@ -133,7 +133,7 @@ const getItemsController = async (req, res) => {
       query.itemType = "FOUND";
     }
 
-    const items = await itemModel.find(query).sort({ createdAt: -1 });
+    const items = await itemModel.find(query).populate("user","firstName lastName email").sort({ createdAt: -1 });
 
     res.json(items);
   } catch (err) {
