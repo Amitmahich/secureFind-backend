@@ -141,6 +141,21 @@ const markReportHandledController = async (req, res) => {
     });
   }
 };
+// Get unhandled count
+const getUnhandledReportsCount = async (req, res) => {
+  try {
+    const count = await reportModel.countDocuments({
+      isHandled: false,
+    });
+
+    res.json({
+      success: true,
+      count,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 // get report for a item
 const getItemReportsController = async (req, res) => {
   try {
@@ -166,5 +181,5 @@ module.exports = {
   reportItemController,
   getItemReportsController,
   markReportHandledController,
-  getAllReportsController,
+  getAllReportsController,getUnhandledReportsCount
 };

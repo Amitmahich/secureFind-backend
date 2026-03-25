@@ -6,6 +6,7 @@ const {
   getItemReportsController,
   markReportHandledController,
   getAllReportsController,
+  getUnhandledReportsCount,
 } = require("../controllers/reportItemController");
 const router = express.Router();
 //report-item
@@ -29,6 +30,12 @@ router.patch(
   authMiddleware,
   authorizeRoles("ADMIN"),
   markReportHandledController,
+);
+router.get(
+  "/unhandled-count",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  getUnhandledReportsCount
 );
 
 module.exports = router;
