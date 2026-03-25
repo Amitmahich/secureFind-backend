@@ -14,7 +14,7 @@ const getMyResponsesController = async (req, res) => {
     // received (responses on my items)
     const received = await responseModel
       .find({ item: { $in: itemIds } })
-      .populate("responder", "name email mobile")
+      .populate("responder", "firstName lastName email mobile")
       .populate("item", "itemName user")
       .sort({ createdAt: -1 });
 
