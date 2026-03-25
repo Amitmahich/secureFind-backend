@@ -28,6 +28,53 @@ const getAllUsersController = async (req, res) => {
     });
   }
 };
+// get blocked users
+const getAllBlockedUsersController = async (req, res) => {
+  try {
+    const users = await userModel
+      .find({
+        isBlocked: true,
+        _id: { $ne: req.user._id }, // exclude yourself
+      })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// get unblocked users
+const getAllUnblockedUsersController = async (req, res) => {
+  try {
+    const users = await userModel
+      .find({
+        isBlocked: false,
+        _id: { $ne: req.user._id },
+      })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 // delete user
 const deleteUserController = async (req, res) => {
   try {
@@ -197,4 +244,6 @@ module.exports = {
   deleteUserController,
   toggleBlockUserController,
   getUserPhoneController,
+  getAllBlockedUsersController,
+  getAllUnblockedUsersController,
 };

@@ -6,6 +6,8 @@ const {
   deleteUserController,
   toggleBlockUserController,
   getUserPhoneController,
+  getAllUnblockedUsersController,
+  getAllBlockedUsersController,
 } = require("../controllers/userController");
 const getAdminStats = require("../controllers/adminController");
 
@@ -26,6 +28,21 @@ router.patch(
   authMiddleware,
   authorizeRoles("ADMIN"),
   toggleBlockUserController,
+);
+// get blocked users
+router.get(
+  "/blocked-users",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  getAllBlockedUsersController,
+);
+
+// get unblocked users
+router.get(
+  "/unblocked-users",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  getAllUnblockedUsersController,
 );
 //get user phone
 router.get("/user-phone/:id", authMiddleware, getUserPhoneController);
