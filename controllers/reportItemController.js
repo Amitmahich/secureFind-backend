@@ -92,6 +92,55 @@ const reportItemController = async (req, res) => {
     });
   }
 };
+// get all reports (admin)
+const getAllReportsController = async (req, res) => {
+  try {
+    const reports = await reportModel
+      .find()
+      .populate("reportedBy", "firstName lastName email")
+      .populate("item", "itemName")
+      .sort({ createdAt: -1 });
+
+    res.status(200).send({
+      success: true,
+      reports,
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: error.message,
+    });
+  }
+};
+// mark handled report
+const markReportHandledController = async (req, res) => {
+  try {
+    const report = await reportModel.findById(req.params.id);
+
+    if (!report) {
+      return res.status(404).json({
+        message: "Report not found",
+      });
+    }
+
+    report.isHandled = true;
+    await report.save();
+
+    const io = getIO();
+
+    io.to("admin").emit("reportUpdated", {
+      reportId: report._id,
+    });
+
+    res.json({
+      success: true,
+      message: "Report marked handled",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 // get report for a item
 const getItemReportsController = async (req, res) => {
   try {
@@ -113,4 +162,9 @@ const getItemReportsController = async (req, res) => {
     });
   }
 };
-module.exports = { reportItemController ,getItemReportsController};
+module.exports = {
+  reportItemController,
+  getItemReportsController,
+  markReportHandledController,
+  getAllReportsController,
+};

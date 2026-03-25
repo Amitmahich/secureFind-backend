@@ -4,6 +4,8 @@ const { authorizeRoles } = require("../middleware/authorizeRoles");
 const {
   reportItemController,
   getItemReportsController,
+  markReportHandledController,
+  getAllReportsController,
 } = require("../controllers/reportItemController");
 const router = express.Router();
 //report-item
@@ -14,6 +16,19 @@ router.get(
   authMiddleware,
   authorizeRoles("ADMIN"),
   getItemReportsController,
+);
+router.get(
+  "/all-reports",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  getAllReportsController,
+);
+
+router.patch(
+  "/mark-handled/:id",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  markReportHandledController,
 );
 
 module.exports = router;
