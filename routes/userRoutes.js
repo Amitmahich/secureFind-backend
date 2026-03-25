@@ -7,6 +7,7 @@ const {
   toggleBlockUserController,
   getUserPhoneController,
 } = require("../controllers/userController");
+const getAdminStats = require("../controllers/adminController");
 
 const router = express.Router();
 
@@ -28,4 +29,6 @@ router.patch(
 );
 //get user phone
 router.get("/user-phone/:id", authMiddleware, getUserPhoneController);
+// get admin stats
+router.get("/stats", authMiddleware, authorizeRoles("ADMIN"), getAdminStats);
 module.exports = router;
