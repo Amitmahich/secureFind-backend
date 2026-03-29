@@ -8,9 +8,15 @@ const {
   getAllReportsController,
   getUnhandledReportsCount,
 } = require("../controllers/reportItemController");
+const { checkBlocked } = require("../middleware/checkBlocked");
 const router = express.Router();
 //report-item
-router.post("/report-item/:id", authMiddleware, reportItemController);
+router.post(
+  "/report-item/:id",
+  authMiddleware,
+  checkBlocked,
+  reportItemController,
+);
 //get reports for an item
 router.get(
   "/item-reports/:id",
@@ -35,7 +41,7 @@ router.get(
   "/unhandled-count",
   authMiddleware,
   authorizeRoles("ADMIN"),
-  getUnhandledReportsCount
+  getUnhandledReportsCount,
 );
 
 module.exports = router;

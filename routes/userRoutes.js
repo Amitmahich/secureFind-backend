@@ -1,6 +1,7 @@
 const express = require("express");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const { authorizeRoles } = require("../middleware/authorizeRoles");
+const { checkBlocked } = require("../middleware/checkBlocked");
 const {
   getAllUsersController,
   deleteUserController,
@@ -21,7 +22,12 @@ router.get(
   getAllUsersController,
 );
 //delete-user
-router.delete("/delete-user/:id", authMiddleware, deleteUserController);
+router.delete(
+  "/delete-user/:id",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  deleteUserController,
+);
 //blocked-unblocked user
 router.patch(
   "/block-unblock-user/:id",
@@ -45,7 +51,12 @@ router.get(
   getAllUnblockedUsersController,
 );
 //get user phone
-router.get("/user-phone/:id", authMiddleware, getUserPhoneController);
+router.get(
+  "/user-phone/:id",
+  authMiddleware,
+  checkBlocked,
+  getUserPhoneController,
+);
 // get admin stats
 router.get("/stats", authMiddleware, authorizeRoles("ADMIN"), getAdminStats);
 module.exports = router;

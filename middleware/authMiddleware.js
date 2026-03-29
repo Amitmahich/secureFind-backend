@@ -24,11 +24,6 @@ const authMiddleware = async (req, res, next) => {
         message: "User not found",
       });
     }
-    if (user.isBlocked) {
-      return res.status(403).json({
-        message: "Your account is blocked",
-      });
-    }
     // attach full user
     req.user = user;
 

@@ -43,6 +43,12 @@ const getMyResponsesController = async (req, res) => {
 // submit answer
 const submitAnswerController = async (req, res) => {
   try {
+    if (req.user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is blocked",
+      });
+    }
     const { itemId } = req.params;
     const { answer } = req.body || {};
     if (!answer) {
@@ -107,6 +113,12 @@ const submitAnswerController = async (req, res) => {
 // update response
 const updateResponseStatusController = async (req, res) => {
   try {
+    if (req.user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is blocked",
+      });
+    }
     const { id } = req.params;
 
     const response = await responseModel
@@ -135,13 +147,13 @@ const updateResponseStatusController = async (req, res) => {
         message: false,
         message: "Already approved. Cannot change status.",
       });
-      // check item already claimed
-      if (response.item.status === "CLAIMED") {
-        return res.status(400).json({
-          success: false,
-          message: "Item already claimed",
-        });
-      }
+    }
+    // check item already claimed
+    if (response.item.status === "CLAIMED") {
+      return res.status(400).json({
+        success: false,
+        message: "Item already claimed",
+      });
     }
 
     // check if already someone approved

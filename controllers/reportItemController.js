@@ -7,6 +7,12 @@ const getReportConfirmationTemplate = require("../utils/reportConfirmationEmailT
 // report item
 const reportItemController = async (req, res) => {
   try {
+    if (req.user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is blocked",
+      });
+    }
     const { id } = req.params; // itemId
     const { reason } = req.body || {};
 
@@ -72,7 +78,7 @@ const reportItemController = async (req, res) => {
       reportedBy: {
         user: {
           id: req.user._id,
-          name: req.user.name,
+          name: req.user.firstName + " " + req.user.lastName,
           email: req.user.email,
         },
       },
@@ -181,5 +187,6 @@ module.exports = {
   reportItemController,
   getItemReportsController,
   markReportHandledController,
-  getAllReportsController,getUnhandledReportsCount
+  getAllReportsController,
+  getUnhandledReportsCount,
 };

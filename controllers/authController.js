@@ -163,6 +163,7 @@ const loginController = async (req, res) => {
         name: user.firstName,
         email: user.email,
         role: user.role,
+        isBlocked: user.isBlocked,
       },
     });
   } catch (error) {
@@ -243,7 +244,7 @@ const resetPasswordController = async (req, res) => {
     if (!user) {
       return res.status(400).send({
         success: false,
-        massage: "Invalid and expired token",
+        massage: "Invalid or expired token",
       });
     }
     const { password } = req.body || {};
@@ -291,13 +292,11 @@ const logoutUserController = async (req, res) => {
   }
 };
 
-module.exports = { logoutUserController };
-
 module.exports = {
   registerController,
   verifyEmail,
   loginController,
   forgetPasswordController,
   resetPasswordController,
-  logoutUserController
+  logoutUserController,
 };

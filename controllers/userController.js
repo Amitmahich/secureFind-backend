@@ -94,12 +94,12 @@ const deleteUserController = async (req, res) => {
       });
     }
     // Only self and admin can delete user
-    if (req.user._id.toString() !== id && req.user.role !== "ADMIN") {
-      return res.status(403).send({
-        success: false,
-        message: "Not authorized",
-      });
-    }
+    // if (req.user._id.toString() !== id && req.user.role !== "ADMIN") {
+    //   return res.status(403).send({
+    //     success: false,
+    //     message: "Not authorized",
+    //   });
+    // }
     //getting user's items first(for socket)
     const items = await itemModel.find({ user: id }).select("_id");
     const itemIds = items.map((i) => i._id);
@@ -191,6 +191,13 @@ const getUserPhoneController = async (req, res) => {
   try {
     const { id } = req.params; // responder id
     const currentUserId = req.user._id.toString();
+
+    if (req.user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is blocked",
+      });
+    }
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({

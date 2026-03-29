@@ -9,6 +9,12 @@ const userModel = require("../models/userModel");
 //create item
 const createItemController = async (req, res) => {
   try {
+    if (req.user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is blocked",
+      });
+    }
     const { itemName, description, imageUrl, itemType, question, location } =
       req.body || {};
 
@@ -133,7 +139,10 @@ const getItemsController = async (req, res) => {
       query.itemType = "FOUND";
     }
 
-    const items = await itemModel.find(query).populate("user","firstName lastName email").sort({ createdAt: -1 });
+    const items = await itemModel
+      .find(query)
+      .populate("user", "firstName lastName email")
+      .sort({ createdAt: -1 });
 
     res.json(items);
   } catch (err) {
@@ -204,6 +213,12 @@ const getMyItems = async (req, res) => {
 // delete item
 const deleteItemController = async (req, res) => {
   try {
+    if (req.user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is blocked",
+      });
+    }
     const { id } = req.params;
 
     // check valid id

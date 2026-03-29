@@ -11,9 +11,10 @@ const {
 const { authMiddleware } = require("../middleware/authMiddleware");
 const { authorizeRoles } = require("../middleware/authorizeRoles");
 const { reportItemController } = require("../controllers/reportItemController");
+const { checkBlocked } = require("../middleware/checkBlocked");
 
 //create-item
-router.post("/create-item", authMiddleware, createItemController);
+router.post("/create-item", authMiddleware, checkBlocked, createItemController);
 // get-items
 router.get("/get-items", authMiddleware, getItemsController);
 //get-single-item
@@ -21,6 +22,11 @@ router.get("/get-item/:id", authMiddleware, getSingleItemController);
 //get-my-items
 router.get("/get-my-items", authMiddleware, getMyItems);
 //delete-item
-router.delete("/delete-item/:id", authMiddleware, deleteItemController);
+router.delete(
+  "/delete-item/:id",
+  authMiddleware,
+  checkBlocked,
+  deleteItemController,
+);
 
 module.exports = router;
