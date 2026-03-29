@@ -93,13 +93,6 @@ const deleteUserController = async (req, res) => {
         message: "User not found",
       });
     }
-    // Only self and admin can delete user
-    // if (req.user._id.toString() !== id && req.user.role !== "ADMIN") {
-    //   return res.status(403).send({
-    //     success: false,
-    //     message: "Not authorized",
-    //   });
-    // }
     //getting user's items first(for socket)
     const items = await itemModel.find({ user: id }).select("_id");
     const itemIds = items.map((i) => i._id);
@@ -167,7 +160,7 @@ const toggleBlockUserController = async (req, res) => {
     //////////////////////////////////SOCKET PART START/////////////////////////////
     const io = getIO();
 
-    io.to("admin").emit("userBlockStatusChanged", {
+    io.emit("userBlockStatusChanged", {
       userId: id,
       isBlocked: user.isBlocked,
     });
